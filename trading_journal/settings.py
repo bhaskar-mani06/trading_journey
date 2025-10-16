@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 # Load environment variables from env_supabase.txt
 load_dotenv('env_supabase.txt')
 
+# For local development, also try env_local.txt
+load_dotenv('env_local.txt')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
