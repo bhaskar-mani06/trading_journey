@@ -79,12 +79,18 @@ def supabase_register_view(request):
                             messages.success(request, 'Registration successful! Please check your email and confirm your account before signing in.')
                             return redirect('login')
                 else:
-                    error_msg = 'Failed to create user account'
+                    error_msg = 'Failed to create Django user account'
             else:
                 error_msg = result.get('error', {}).get('message', 'Registration failed')
+                # Log the full error for debugging
+                print(f"Supabase registration error: {result}")
                 
         except Exception as e:
             error_msg = f'Registration error: {str(e)}'
+            # Log the full exception for debugging
+            print(f"Registration exception: {str(e)}")
+            import traceback
+            print(f"Full traceback: {traceback.format_exc()}")
         
         if request.content_type == 'application/json':
             return JsonResponse({'success': False, 'error': error_msg})
