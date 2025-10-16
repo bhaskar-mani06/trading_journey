@@ -24,6 +24,12 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['*']  # Allow all hosts for now
 
+# CSRF Trusted Origins for Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-d9af.up.railway.app',
+    'https://*.up.railway.app',
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
