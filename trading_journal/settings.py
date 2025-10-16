@@ -19,7 +19,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,trading-journey-n4n9.onrender.com').split(',')
+ALLOWED_HOSTS = ['*']  # Allow all hosts for now
 
 # Application definition
 INSTALLED_APPS = [
