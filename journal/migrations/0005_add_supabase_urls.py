@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='trade',
             name='screenshot_after_url',
-            field=models.URLField(blank=True, help_text='Supabase URL for after screenshot', null=True),
+            field=models.URLField(blank=True, help_text='Local URL for after screenshot', null=True),
         ),
         migrations.AddField(
             model_name='trade',
             name='screenshot_before_url',
-            field=models.URLField(blank=True, help_text='Supabase URL for before screenshot', null=True),
+            field=models.URLField(blank=True, help_text='Local URL for before screenshot', null=True),
         ),
     ]

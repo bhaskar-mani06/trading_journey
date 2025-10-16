@@ -63,16 +63,16 @@ class Trade(models.Model):
         help_text="Chart after closing the trade"
     )
     
-    # Supabase storage URLs (for cloud storage)
+    # Local file storage URLs (for local development)
     screenshot_before_url = models.URLField(
         blank=True, 
         null=True,
-        help_text="Supabase URL for before screenshot"
+        help_text="Local URL for before screenshot"
     )
     screenshot_after_url = models.URLField(
         blank=True, 
         null=True,
-        help_text="Supabase URL for after screenshot"
+        help_text="Local URL for after screenshot"
     )
     
     # Psychological and learning

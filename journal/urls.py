@@ -1,17 +1,13 @@
 from django.urls import path
 from . import views
-from . import supabase_views
-
 urlpatterns = [
-    # Authentication - Supabase Only
-    path('login/', supabase_views.supabase_login_view, name='login'),
-    path('register/', supabase_views.supabase_register_view, name='register'),
-    path('logout/', supabase_views.supabase_logout_view, name='logout'),
-    path('profile/', supabase_views.supabase_profile_view, name='profile'),
-    path('webhook/', supabase_views.supabase_webhook_view, name='webhook'),
+    # Authentication - Local Django auth
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('logout/', views.logout_view, name='logout'),
     
     # Main pages
-    path('', views.dashboard, name='dashboard'),
+    path('', views.home_view, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     
     # Trade management

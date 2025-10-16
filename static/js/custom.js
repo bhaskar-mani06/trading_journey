@@ -1,7 +1,4 @@
-// Custom JavaScript for Trading Journal
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-calculate P&L when entry/exit prices change
     const entryPriceInput = document.getElementById('id_entry_price');
     const exitPriceInput = document.getElementById('id_exit_price');
     const quantityInput = document.getElementById('id_quantity');

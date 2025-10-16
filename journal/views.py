@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.db.models import Q, Count, Avg, Sum
 from django.core.paginator import Paginator
@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Trade, WeeklyReview, MonthlyReview, TradingPsychology, TradingGoal, MarketCondition, TradingHabit
 from .forms import TradeForm, WeeklyReviewForm, MonthlyReviewForm, TradeFilterForm, CustomUserCreationForm, TradingPsychologyForm, TradingGoalForm, MarketConditionForm, TradingHabitForm
-from .supabase_client import upload_file_to_supabase, delete_file_from_supabase
+# Local development - no external dependencies
 import json
 import csv
 import io
@@ -19,6 +19,20 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 from reportlab.lib.units import inch
 
+
+def login_view(request):
+    """User login view"""
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Login successful!')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    return render(request, 'registration/login.html')
 
 def register_view(request):
     """User registration view"""
@@ -32,6 +46,18 @@ def register_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
+
+def logout_view(request):
+    """User logout view"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('login')
+
+def home_view(request):
+    """Home page view - no login required"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'journal/home.html')
 
 
 
@@ -172,34 +198,8 @@ def trade_create(request):
             trade = form.save(commit=False)
             trade.user = request.user
             
-            # Handle file uploads to Supabase
-            if 'screenshot_before' in request.FILES:
-                file = request.FILES['screenshot_before']
-                file_path = f"before/{request.user.id}/{trade.symbol}_{trade.date}_{file.name}"
-                file_content = file.read()
-                
-                # Upload to Supabase
-                supabase_url = upload_file_to_supabase(
-                    file_content, 
-                    file_path, 
-                    file.content_type
-                )
-                if supabase_url:
-                    trade.screenshot_before_url = supabase_url
-            
-            if 'screenshot_after' in request.FILES:
-                file = request.FILES['screenshot_after']
-                file_path = f"after/{request.user.id}/{trade.symbol}_{trade.date}_{file.name}"
-                file_content = file.read()
-                
-                # Upload to Supabase
-                supabase_url = upload_file_to_supabase(
-                    file_content, 
-                    file_path, 
-                    file.content_type
-                )
-                if supabase_url:
-                    trade.screenshot_after_url = supabase_url
+            # Handle file uploads locally
+            # Files will be handled by Django's default file handling
             
             trade.save()
             messages.success(request, 'Trade added successfully!')

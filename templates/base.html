@@ -129,7 +129,7 @@
                 </div>
                 {% else %}
                 <div class="flex items-center space-x-4">
-                    <!-- Supabase Auth Only -->
+                    <!-- Local Auth Only -->
                     <a href="{% url 'login' %}" class="text-white hover:text-green-300 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-white hover:bg-opacity-20 transform hover:scale-105">
                         <i class="fas fa-sign-in-alt mr-1"></i>Login
                     </a>
@@ -308,6 +308,7 @@
     </div>
     {% endif %}
 
+
     <script>
         // Initialize GSAP animations
         document.addEventListener('DOMContentLoaded', function() {
@@ -461,116 +462,10 @@
             });
         }
 
-        // Mobile Menu Toggle
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const mobileMenuClose = document.getElementById('mobileMenuClose');
-        const mobileSidebar = document.getElementById('mobileSidebar');
-
-        if (mobileMenuToggle) {
-            mobileMenuToggle.addEventListener('click', function() {
-                mobileSidebar.classList.remove('-translate-x-full');
-                mobileSidebar.classList.add('translate-x-0');
-            });
-        }
-
-        if (mobileMenuClose) {
-            mobileMenuClose.addEventListener('click', function() {
-                mobileSidebar.classList.add('-translate-x-full');
-                mobileSidebar.classList.remove('translate-x-0');
-            });
-        }
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
-            if (mobileSidebar && !mobileSidebar.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
-                mobileSidebar.classList.add('-translate-x-full');
-                mobileSidebar.classList.remove('translate-x-0');
-            }
-        });
-
-        // Psychology Menu Toggle
-        function togglePsychologyMenu() {
-            const psychologyMenu = document.getElementById('psychologyMenu');
-            const userMenu = document.getElementById('userMenu');
-            
-            // Close user menu if open
-            if (userMenu && !userMenu.classList.contains('hidden')) {
-                userMenu.classList.add('hidden');
-            }
-            
-            // Toggle psychology menu
-            if (psychologyMenu) {
-                psychologyMenu.classList.toggle('hidden');
-            }
-        }
-
-        // User Menu Toggle
-        function toggleUserMenu() {
-            const userMenu = document.getElementById('userMenu');
-            const psychologyMenu = document.getElementById('psychologyMenu');
-            
-            // Close psychology menu if open
-            if (psychologyMenu && !psychologyMenu.classList.contains('hidden')) {
-                psychologyMenu.classList.add('hidden');
-            }
-            
-            // Toggle user menu
-            if (userMenu) {
-                userMenu.classList.toggle('hidden');
-            }
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function(event) {
-            const psychologyMenu = document.getElementById('psychologyMenu');
-            const userMenu = document.getElementById('userMenu');
-            
-            // Close psychology menu
-            if (psychologyMenu && !psychologyMenu.contains(event.target) && !event.target.closest('button[onclick="togglePsychologyMenu()"]')) {
-                psychologyMenu.classList.add('hidden');
-            }
-            
-            // Close user menu
-            if (userMenu && !userMenu.contains(event.target) && !event.target.closest('button[onclick="toggleUserMenu()"]')) {
-                userMenu.classList.add('hidden');
-            }
-        });
-
-        // Touch gestures for mobile
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        document.addEventListener('touchstart', function(event) {
-            touchStartX = event.changedTouches[0].screenX;
-        });
-
-        document.addEventListener('touchend', function(event) {
-            touchEndX = event.changedTouches[0].screenX;
-            handleSwipe();
-        });
-
-        function handleSwipe() {
-            const swipeThreshold = 50;
-            const swipeDistance = touchEndX - touchStartX;
-
-            if (Math.abs(swipeDistance) > swipeThreshold) {
-                if (swipeDistance > 0 && touchStartX < 50) {
-                    // Swipe right from left edge - open menu
-                    if (mobileSidebar && window.innerWidth < 1024) {
-                        mobileSidebar.classList.remove('-translate-x-full');
-                        mobileSidebar.classList.add('translate-x-0');
-                    }
-                } else if (swipeDistance < 0) {
-                    // Swipe left - close menu
-                    if (mobileSidebar && window.innerWidth < 1024) {
-                        mobileSidebar.classList.add('-translate-x-full');
-                        mobileSidebar.classList.remove('translate-x-0');
-                    }
-                }
-            }
-        }
     </script>
 
+    <script src="{% load static %}{% static 'js/custom.min.js' %}"></script>
+    <script src="{% load static %}{% static 'js/inline.min.js' %}"></script>
     {% block extra_js %}
     {% endblock %}
 </body>
