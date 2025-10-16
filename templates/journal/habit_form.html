@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if habit %}Edit{% else %}Create{% endif %} Trading Habit - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-green-600 to-teal-600 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-2xl p-8 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    📈 {% if habit %}Edit{% else %}Create{% endif %} Trading Habit
+                </h1>
+                <p class="text-green-100 text-lg">
+                    Build positive habits and break negative ones for better trading
+                </p>
+            </div>
+            <div class="text-6xl animate-bounce">
+                <i class="fas fa-chart-line text-yellow-300"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Habit Type -->
+            <div>
+                <label for="{{ form.habit_type.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-tag mr-2"></i>Habit Type
+                </label>
+                {{ form.habit_type }}
+                {% if form.habit_type.errors %}
+                    <div class="text-red-600 text-sm mt-1">{{ form.habit_type.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Name and Description -->
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-signature mr-2"></i>Habit Name
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-red-600 text-sm mt-1">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-align-left mr-2"></i>Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-red-600 text-sm mt-1">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Frequency and Target -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.frequency.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-clock mr-2"></i>Frequency
+                    </label>
+                    {{ form.frequency }}
+                    {% if form.frequency.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.frequency.errors.0 }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        How often you want to perform this habit (e.g., Daily, Weekly, 3 times per week)
+                    </p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.target_count.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-target mr-2"></i>Target Count
+                    </label>
+                    {{ form.target_count }}
+                    {% if form.target_count.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.target_count.errors.0 }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Target number of times to perform this habit
+                    </p>
+                </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.start_date.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-play mr-2"></i>Start Date
+                    </label>
+                    {{ form.start_date }}
+                    {% if form.start_date.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.start_date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="{{ form.end_date.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-flag-checkered mr-2"></i>End Date (Optional)
+                    </label>
+                    {{ form.end_date }}
+                    {% if form.end_date.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.end_date.errors.0 }}</div>
+                    {% endif %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Leave empty for ongoing habits
+                    </p>
+                </div>
+            </div>
+
+            <!-- Habit Examples -->
+            <div class="bg-green-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-lightbulb mr-2 text-green-600"></i>Habit Examples
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white dark:bg-gray-600 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">✅ Good Habits</h4>
+                        <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                            <li>• Review trades daily</li>
+                            <li>• Follow risk management rules</li>
+                            <li>• Keep trading journal updated</li>
+                            <li>• Analyze market before trading</li>
+                            <li>• Take breaks during trading</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white dark:bg-gray-600 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">❌ Bad Habits to Break</h4>
+                        <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                            <li>• Overtrading</li>
+                            <li>• Revenge trading</li>
+                            <li>• Ignoring stop losses</li>
+                            <li>• Trading without plan</li>
+                            <li>• Emotional decision making</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Habit Building Tips -->
+            <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>Habit Building Tips
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white dark:bg-gray-600 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">🎯 Start Small</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Begin with achievable targets and gradually increase difficulty.</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-600 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">📅 Be Consistent</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Consistency is key to habit formation. Small daily actions work best.</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-600 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">📊 Track Progress</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Monitor your progress regularly to stay motivated.</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-600 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 dark:text-white mb-2">🏆 Reward Yourself</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Celebrate small wins to reinforce positive behavior.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-wrap gap-4 pt-6">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-save mr-2"></i>{% if habit %}Update{% else %}Create{% endif %} Habit
+                </button>
+                <a href="{% url 'habits_dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

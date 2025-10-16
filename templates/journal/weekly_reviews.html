@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Weekly Reviews - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Weekly Reviews</h1>
+        <a href="{% url 'weekly_review_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            ➕ Add Weekly Review
+        </a>
+    </div>
+
+    <!-- Reviews List -->
+    {% if reviews %}
+        <div class="space-y-6">
+            {% for review in reviews %}
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            Week of {{ review.week_start_date|date:"M d" }} - {{ review.week_end_date|date:"M d, Y" }}
+                        </h3>
+                        <p class="text-sm text-gray-500">
+                            {{ review.total_trades }} trades • Win Rate: {{ review.get_win_rate }}% • P&L: 
+                            <span class="{% if review.total_pnl >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                ₹{{ review.total_pnl|floatformat:2 }}
+                            </span>
+                        </p>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ review.created_at|date:"M d, Y" }}</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">What went well:</h4>
+                        <p class="text-sm text-gray-600">{{ review.what_went_well }}</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Mistakes repeated:</h4>
+                        <p class="text-sm text-gray-600">{{ review.mistakes_repeated }}</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Best setup:</h4>
+                        <p class="text-sm text-gray-600">{{ review.best_setup }}</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Improvements for next week:</h4>
+                        <p class="text-sm text-gray-600">{{ review.improvements_next_week }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow p-12 text-center">
+            <div class="flex flex-col items-center">
+                <span class="text-6xl mb-4">📅</span>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No weekly reviews yet</h3>
+                <p class="text-gray-500 mb-6">Start tracking your weekly progress and insights</p>
+                <a href="{% url 'weekly_review_create' %}" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                    Create Your First Weekly Review
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
