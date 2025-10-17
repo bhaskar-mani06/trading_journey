@@ -19,6 +19,16 @@ class Trade(models.Model):
         ('SCALPING', 'Scalping'),
         ('SWING', 'Swing Trading'),
         ('POSITION', 'Position Trading'),
+        ('LIQUIDITY_SWEEP', 'Liquidity sweep setups'),
+        ('ORDER_BLOCK', 'Order block trades'),
+        ('FAIR_VALUE_GAP', 'Fair Value Gap trades'),
+        ('BREAKER_BLOCK', 'Breaker block setups'),
+        ('MITIGATION_BLOCK', 'Mitigation block trades'),
+        ('MARKET_STRUCTURE', 'Market structure breaks'),
+        ('BOS_CHOCH', 'Break of Structure / Change of Character'),
+        ('REVERSAL', 'Reversal setups'),
+        ('FIBONACCI', 'Fibonacci retracements/extensions'),
+        ('SUPPORT_RESISTANCE', 'Support/Resistance levels'),
         ('OTHER', 'Other'),
     ]
     
