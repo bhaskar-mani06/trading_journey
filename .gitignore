@@ -129,21 +129,25 @@ dmypy.json
 .pyre/
 
 # Django specific
-staticfiles/
 media/
-*.log
+staticfiles/
+static/
 
-# IDE
+# Environment files with sensitive data
+env_local.txt
+env_supabase.txt
+
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-
-# Environment variables
-.env
-.env.local
-.env.production

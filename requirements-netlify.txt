@@ -1,6 +1,0 @@
-Django==4.2.7
-python-decouple==3.8
-psycopg2-binary==2.9.9
-Pillow==10.0.1
-django-csp==3.7
-jsmin==3.0.1

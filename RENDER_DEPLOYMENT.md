@@ -23,12 +23,12 @@ Add these in Render Dashboard → Environment:
 
 ### Required Variables:
 ```
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=your-secret-key-here-change-this
 DEBUG=False
 ALLOWED_HOSTS=your-app-name.onrender.com
 DB_NAME=postgres
 DB_USER=postgres
-DB_PASSWORD=your-supabase-password
+DB_PASSWORD=Bhaskar@24275270
 DB_HOST=db.nqjvhriwceldhkkkinba.supabase.co
 DB_PORT=5432
 ```
@@ -36,7 +36,15 @@ DB_PORT=5432
 ### Optional Variables:
 ```
 DJANGO_SETTINGS_MODULE=trading_journal.settings
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+DEFAULT_FROM_EMAIL=noreply@tradingjournal.com
 ```
+
+**Important:** Replace `your-secret-key-here-change-this` with a strong secret key!
 
 ## Step 5: Deploy
 1. Click "Create Web Service"
