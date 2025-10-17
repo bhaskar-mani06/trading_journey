@@ -1,0 +1,414 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-fade-in">
+    <!-- Welcome Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-2xl p-8 text-white transform hover:scale-105 transition-all duration-500 animate-slide-down">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2 animate-bounce-in">
+                    Welcome back, {{ user.username }}! <i class="fas fa-hand-wave ml-2 animate-float"></i>
+                </h1>
+                <p class="text-blue-100 text-lg">
+                    Here's your trading performance overview
+                </p>
+            </div>
+            <div class="text-6xl animate-float">
+                <i class="fas fa-chart-line text-yellow-300"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium mb-1">Total Trades</p>
+                    <p class="text-3xl font-bold">{{ total_trades }}</p>
+                </div>
+                <div class="text-4xl animate-pulse">
+                    <i class="fas fa-chart-bar text-blue-200"></i>
+                </div>
+            </div>
+            <div class="mt-4 w-full bg-blue-400 rounded-full h-2">
+                <div class="bg-white h-2 rounded-full animate-pulse" style="width: 85%"></div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl" style="animation-delay: 0.1s">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-100 text-sm font-medium mb-1">Win Rate</p>
+                    <p class="text-3xl font-bold">{{ win_rate }}%</p>
+                </div>
+                <div class="text-4xl animate-bounce">
+                    <i class="fas fa-bullseye text-green-200"></i>
+                </div>
+            </div>
+            <div class="mt-4 w-full bg-green-400 rounded-full h-2">
+                <div class="bg-white h-2 rounded-full animate-pulse" style="width: {{ win_rate }}%"></div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br {% if total_pnl >= 0 %}from-green-500 to-emerald-600{% else %}from-red-500 to-red-600{% endif %} rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl" style="animation-delay: 0.2s">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="{% if total_pnl >= 0 %}text-green-100{% else %}text-red-100{% endif %} text-sm font-medium mb-1">Total P&L</p>
+                    <p class="text-3xl font-bold">
+                        ₹{{ total_pnl|floatformat:2 }}
+                    </p>
+                </div>
+                <div class="text-4xl animate-float">
+                    <i class="fas fa-{% if total_pnl >= 0 %}coins{% else %}exclamation-triangle{% endif %} {% if total_pnl >= 0 %}text-green-200{% else %}text-red-200{% endif %}"></i>
+                </div>
+            </div>
+            <div class="mt-4 w-full {% if total_pnl >= 0 %}bg-green-400{% else %}bg-red-400{% endif %} rounded-full h-2">
+                <div class="bg-white h-2 rounded-full animate-pulse" style="width: {% if total_pnl >= 0 %}75%{% else %}25%{% endif %}"></div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl" style="animation-delay: 0.3s">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium mb-1">Avg Risk/Reward</p>
+                    <p class="text-3xl font-bold">{{ avg_risk_reward }}</p>
+                </div>
+                <div class="text-4xl animate-pulse-slow">
+                    <i class="fas fa-balance-scale text-purple-200"></i>
+                </div>
+            </div>
+            <div class="mt-4 w-full bg-purple-400 rounded-full h-2">
+                <div class="bg-white h-2 rounded-full animate-pulse" style="width: 60%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Today's P&L -->
+        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-100 text-sm font-medium mb-1">Today's P&L</p>
+                    <p class="text-3xl font-bold">₹{{ today_pnl }}</p>
+                    <p class="text-green-200 text-xs">{{ today_trades_count }} trades</p>
+                </div>
+                <div class="text-4xl animate-bounce">
+                    <i class="fas fa-calendar-day text-green-200"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- This Week's Performance -->
+        <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-purple-100 text-sm font-medium mb-1">This Week</p>
+                    <p class="text-3xl font-bold">₹{{ week_pnl }}</p>
+                    <p class="text-purple-200 text-xs">{{ week_win_rate }}% win rate</p>
+                </div>
+                <div class="text-4xl animate-pulse">
+                    <i class="fas fa-calendar-week text-purple-200"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Win Streak -->
+        <div class="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-yellow-100 text-sm font-medium mb-1">Win Streak</p>
+                    <p class="text-3xl font-bold">{{ current_win_streak }}</p>
+                    <p class="text-yellow-200 text-xs">Max: {{ max_win_streak }}</p>
+                </div>
+                <div class="text-4xl animate-float">
+                    <i class="fas fa-fire text-yellow-200"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Loss Streak -->
+        <div class="bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl shadow-2xl p-6 text-white transform hover:scale-110 transition-all duration-500 animate-slide-up hover:shadow-3xl">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-100 text-sm font-medium mb-1">Loss Streak</p>
+                    <p class="text-3xl font-bold">{{ current_loss_streak }}</p>
+                    <p class="text-red-200 text-xs">Max: {{ max_loss_streak }}</p>
+                </div>
+                <div class="text-4xl animate-pulse">
+                    <i class="fas fa-exclamation-triangle text-red-200"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-gradient-to-br from-white to-yellow-50 rounded-2xl shadow-2xl p-8 transform hover:scale-105 transition-all duration-500 animate-slide-up" style="animation-delay: 0.4s">
+        <div class="text-center mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-rocket mr-2 text-yellow-500"></i>Quick Actions
+            </h3>
+            <p class="text-gray-600">Get started with your trading journey</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <a href="{% url 'trade_create' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in">
+                <div class="text-4xl mb-4 group-hover:animate-bounce">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <span class="font-bold text-lg">Add New Trade</span>
+                <span class="text-green-100 text-sm mt-1">Start tracking</span>
+            </a>
+            <a href="{% url 'analytics' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in" style="animation-delay: 0.1s">
+                <div class="text-4xl mb-4 group-hover:animate-pulse">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <span class="font-bold text-lg">View Analytics</span>
+                <span class="text-blue-100 text-sm mt-1">Deep insights</span>
+            </a>
+            <a href="{% url 'monthly_summary' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in" style="animation-delay: 0.2s">
+                <div class="text-4xl mb-4 group-hover:animate-float">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <span class="font-bold text-lg">Monthly Summary</span>
+                <span class="text-purple-100 text-sm mt-1">Month overview</span>
+            </a>
+            <a href="{% url 'tax_report' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in" style="animation-delay: 0.3s">
+                <div class="text-4xl mb-4 group-hover:animate-pulse">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <span class="font-bold text-lg">Tax Report</span>
+                <span class="text-orange-100 text-sm mt-1">Tax calculation</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Charts Section (Collapsible) -->
+    <div class="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-500 animate-slide-up" style="animation-delay: 0.4s">
+        <div class="px-8 py-6 border-b border-blue-200 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-chart-line mr-2"></i>Performance Charts
+                </h3>
+                <button onclick="toggleCharts()" class="text-white hover:text-blue-200 transition-colors duration-300">
+                    <i class="fas fa-chevron-down text-xl" id="chartsToggle"></i>
+                </button>
+            </div>
+        </div>
+        <div id="chartsContent" class="hidden p-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Monthly Performance Chart -->
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line mr-2 text-blue-500"></i>Monthly Performance
+                    </h4>
+            <canvas id="monthlyChart" width="400" height="200" class="rounded-lg"></canvas>
+        </div>
+
+        <!-- Win/Loss Distribution -->
+                <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-pie mr-2 text-green-500"></i>Win/Loss Distribution
+                    </h4>
+            <canvas id="winLossChart" width="400" height="200" class="rounded-lg"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Trades and Setup Performance -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Recent Trades -->
+        <div class="bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-500 animate-slide-up" style="animation-delay: 0.6s">
+            <div class="px-8 py-6 border-b border-orange-200 bg-gradient-to-r from-orange-500 to-red-500 rounded-t-2xl">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-history mr-2"></i>Recent Trades
+                </h3>
+            </div>
+            <div class="p-8">
+                {% if recent_trades %}
+                    <div class="space-y-4">
+                        {% for trade in recent_trades %}
+                        <div class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-gray-100">
+                            <div>
+                                <p class="font-bold text-gray-900 text-lg">{{ trade.symbol }}</p>
+                                <p class="text-sm text-gray-500">
+                                    <i class="fas fa-calendar mr-1"></i>{{ trade.date|date:"M d, Y" }} • 
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {% if trade.trade_type == 'LONG' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ trade.trade_type }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-lg {% if trade.profit_loss >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                    ₹{{ trade.profit_loss|floatformat:2 }}
+                                </p>
+                                <p class="text-sm text-gray-500">{{ trade.percentage_gain_loss|floatformat:2 }}%</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-6">
+                        <a href="{% url 'trade_list' %}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-arrow-right mr-2"></i>View all trades
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4 animate-bounce">
+                            <i class="fas fa-chart-line text-gray-300"></i>
+                        </div>
+                        <p class="text-gray-500 text-lg mb-4">No trades yet</p>
+                        <a href="{% url 'trade_create' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-plus mr-2"></i>Add your first trade
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Setup Performance -->
+        <div class="bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-500 animate-slide-up" style="animation-delay: 0.7s">
+            <div class="px-8 py-6 border-b border-purple-200 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-t-2xl">
+                <h3 class="text-xl font-bold text-white">
+                    <i class="fas fa-cogs mr-2"></i>Setup Performance
+                </h3>
+            </div>
+            <div class="p-8">
+                {% if setup_performance %}
+                    <div class="space-y-4">
+                        {% for setup in setup_performance|slice:":5" %}
+                        <div class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-gray-100">
+                            <div>
+                                <p class="font-bold text-gray-900 text-lg">{{ setup.setup_type|title }}</p>
+                                <p class="text-sm text-gray-500">
+                                    <i class="fas fa-chart-bar mr-1"></i>{{ setup.count }} trades
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-lg {% if setup.total_pnl >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                    ₹{{ setup.total_pnl|floatformat:2 }}
+                                </p>
+                                <p class="text-sm text-gray-500">Avg: ₹{{ setup.avg_pnl|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4 animate-pulse">
+                            <i class="fas fa-cogs text-gray-300"></i>
+                        </div>
+                        <p class="text-gray-500 text-lg">No setup data available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl shadow-lg p-6">
+        <div class="text-center mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-link mr-2 text-blue-500"></i>Quick Links
+            </h3>
+            <p class="text-gray-600">Access advanced features</p>
+    </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{% url 'psychology_dashboard' %}" class="flex items-center justify-center px-4 py-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-brain text-purple-600 mr-2"></i>
+                <span class="text-sm font-medium text-gray-700">Psychology</span>
+            </a>
+            <a href="{% url 'goals_dashboard' %}" class="flex items-center justify-center px-4 py-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-target text-blue-600 mr-2"></i>
+                <span class="text-sm font-medium text-gray-700">Goals</span>
+            </a>
+            <a href="{% url 'habits_dashboard' %}" class="flex items-center justify-center px-4 py-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-chart-line text-green-600 mr-2"></i>
+                <span class="text-sm font-medium text-gray-700">Habits</span>
+            </a>
+            <a href="{% url 'market_conditions' %}" class="flex items-center justify-center px-4 py-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-chart-area text-orange-600 mr-2"></i>
+                <span class="text-sm font-medium text-gray-700">Market</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle Charts Function
+    function toggleCharts() {
+        const content = document.getElementById('chartsContent');
+        const toggle = document.getElementById('chartsToggle');
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            toggle.classList.remove('fa-chevron-down');
+            toggle.classList.add('fa-chevron-up');
+        } else {
+            content.classList.add('hidden');
+            toggle.classList.remove('fa-chevron-up');
+            toggle.classList.add('fa-chevron-down');
+        }
+    }
+
+    // Monthly Performance Chart
+    const monthlyData = {{ monthly_data|safe }};
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(item => item.month),
+            datasets: [{
+                label: 'P&L (₹)',
+                data: monthlyData.map(item => item.pnl),
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Win/Loss Distribution Chart
+    const winLossCtx = document.getElementById('winLossChart').getContext('2d');
+    new Chart(winLossCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Winning Trades', 'Losing Trades'],
+            datasets: [{
+                data: [{{ winning_trades }}, {{ losing_trades }}],
+                backgroundColor: [
+                    'rgb(34, 197, 94)',
+                    'rgb(239, 68, 68)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

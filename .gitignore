@@ -1,0 +1,35 @@
+# Django
+*.pyc
+__pycache__/
+*.log
+db.sqlite3
+db.sqlite3-journal
+.env
+.env.backup
+
+# Static files
+static/
+media/
+
+# Django specific
+manage.py
+requirements.txt
+Procfile
+runtime.txt
+
+# Old deployment files
+DEPLOYMENT_READY.md
+RENDER_DEPLOYMENT.md
+RENDER_DEPLOYMENT.md
+
+# Keep only frontend files
+!index.html
+!test.html
+!deployment-ready.html
+!netlify.toml
+!package.json
+!js/
+!README.md
+!NETLIFY_READY.md
+!DEPLOYMENT_CHECKLIST.md
+!DEPLOYMENT_FIX.md

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Journal - Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Trading Journal - Setup Test</h1>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Configuration Test</h2>
+            <div id="test-results" class="space-y-2">
+                <div id="supabase-test" class="flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-gray-300 mr-2"></span>
+                    <span>Supabase Connection</span>
+                </div>
+                <div id="auth-test" class="flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-gray-300 mr-2"></span>
+                    <span>Authentication System</span>
+                </div>
+                <div id="api-test" class="flex items-center">
+                    <span class="w-4 h-4 rounded-full bg-gray-300 mr-2"></span>
+                    <span>API Functions</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Quick Setup Guide</h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <h3 class="font-semibold text-blue-800">1. Update Supabase Configuration</h3>
+                    <p class="text-blue-700">Edit <code class="bg-blue-100 px-2 py-1 rounded">supabase-config.js</code> with your actual Supabase URL and anon key.</p>
+                </div>
+                
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <h3 class="font-semibold text-green-800">2. Database Setup Complete</h3>
+                    <p class="text-green-700">✅ All tables created with RLS policies</p>
+                </div>
+                
+                <div class="p-4 bg-purple-50 rounded-lg">
+                    <h3 class="font-semibold text-purple-800">3. Ready for Netlify</h3>
+                    <p class="text-purple-700">All files are ready for deployment to Netlify!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Next Steps</h2>
+            <ol class="list-decimal list-inside space-y-2">
+                <li>Update your Supabase credentials in <code>supabase-config.js</code></li>
+                <li>Test locally by opening <code>index.html</code> in your browser</li>
+                <li>Deploy to Netlify (drag & drop or Git integration)</li>
+                <li>Set environment variables in Netlify dashboard</li>
+                <li>Register and start using your trading journal!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Test Supabase connection
+        async function testSupabase() {
+            try {
+                const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+                const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+                
+                if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+                    document.getElementById('supabase-test').innerHTML = 
+                        '<span class="w-4 h-4 rounded-full bg-yellow-400 mr-2"></span><span>Supabase Connection - Please update credentials</span>';
+                    return;
+                }
+                
+                const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await supabase.from('trades').select('count').limit(1);
+                
+                if (error) throw error;
+                
+                document.getElementById('supabase-test').innerHTML = 
+                    '<span class="w-4 h-4 rounded-full bg-green-400 mr-2"></span><span>Supabase Connection - ✅ Working</span>';
+            } catch (error) {
+                document.getElementById('supabase-test').innerHTML = 
+                    '<span class="w-4 h-4 rounded-full bg-red-400 mr-2"></span><span>Supabase Connection - ❌ Error: ' + error.message + '</span>';
+            }
+        }
+
+        // Test authentication
+        function testAuth() {
+            if (typeof window.authManager !== 'undefined') {
+                document.getElementById('auth-test').innerHTML = 
+                    '<span class="w-4 h-4 rounded-full bg-green-400 mr-2"></span><span>Authentication System - ✅ Loaded</span>';
+            } else {
+                document.getElementById('auth-test').innerHTML = 
+                    '<span class="w-4 h-4 rounded-full bg-red-400 mr-2"></span><span>Authentication System - ❌ Not loaded</span>';
+            }
+        }
+
+        // Test API
+        function testAPI() {
+            if (typeof window.tradingAPI !== 'undefined') {
+                document.getElementById('api-test').innerHTML = 
+                    '<span class="w-4 h-4 rounded-full bg-green-400 mr-2"></span><span>API Functions - ✅ Loaded</span>';
+            } else {
+                document.getElementById('api-test').innerHTML = 
+                    '<span class="w-4 h-4 rounded-full bg-red-400 mr-2"></span><span>API Functions - ❌ Not loaded</span>';
+            }
+        }
+
+        // Run tests
+        document.addEventListener('DOMContentLoaded', function() {
+            testSupabase();
+            testAuth();
+            testAPI();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Date *</label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="{{ form.symbol.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Symbol *</label>
+                    {{ form.symbol }}
+                    {% if form.symbol.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.symbol.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">e.g., RELIANCE, TCS, INFY, HDFCBANK</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.trade_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Trade Type *</label>
+                    {{ form.trade_type }}
+                    {% if form.trade_type.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.trade_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.quantity.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Price Information -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Price Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.entry_price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Entry Price *</label>
+                        {{ form.entry_price }}
+                        {% if form.entry_price.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.entry_price.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.exit_price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Exit Price *</label>
+                        {{ form.exit_price }}
+                        {% if form.exit_price.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.exit_price.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Management -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Risk Management</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.stop_loss.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Stop Loss *</label>
+                        {{ form.stop_loss }}
+                        {% if form.stop_loss.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.stop_loss.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.target_price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Target Price *</label>
+                        {{ form.target_price }}
+                        {% if form.target_price.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.target_price.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Results</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.profit_loss.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Profit/Loss (₹) * 
+                            <span class="text-xs text-gray-500">(Auto-calculated)</span>
+                        </label>
+                        {{ form.profit_loss }}
+                        {% if form.profit_loss.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.profit_loss.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            This will be calculated automatically based on entry/exit prices
+                        </p>
+                        <div id="pnl-status" class="mt-2 text-sm font-medium hidden">
+                            <span id="pnl-text"></span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.percentage_gain_loss.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Percentage Gain/Loss (%) * 
+                            <span class="text-xs text-gray-500">(Auto-calculated)</span>
+                        </label>
+                        {{ form.percentage_gain_loss }}
+                        {% if form.percentage_gain_loss.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.percentage_gain_loss.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-500">
+                            <i class="fas fa-percentage mr-1"></i>
+                            Percentage will be calculated automatically
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <label for="{{ form.exit_reason.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Exit Reason *</label>
+                    {{ form.exit_reason }}
+                    {% if form.exit_reason.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.exit_reason.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Analysis -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Analysis</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.setup_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Setup Type *</label>
+                        {{ form.setup_type }}
+                        {% if form.setup_type.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.setup_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.confidence_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Confidence Level (1-10) *</label>
+                        {{ form.confidence_level }}
+                        {% if form.confidence_level.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.confidence_level.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screenshots -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Screenshots</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.screenshot_before.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Chart Before Trade</label>
+                        {{ form.screenshot_before }}
+                        {% if form.screenshot_before.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.screenshot_before.errors.0 }}</p>
+                        {% endif %}
+                        {% if trade and trade.screenshot_before %}
+                            <div class="mt-2">
+                                <img src="{{ trade.screenshot_before.url }}" alt="Before trade" class="w-32 h-20 object-cover rounded">
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.screenshot_after.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Chart After Trade</label>
+                        {{ form.screenshot_after }}
+                        {% if form.screenshot_after.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.screenshot_after.errors.0 }}</p>
+                        {% endif %}
+                        {% if trade and trade.screenshot_after %}
+                            <div class="mt-2">
+                                <img src="{{ trade.screenshot_after.url }}" alt="After trade" class="w-32 h-20 object-cover rounded">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Notes</h3>
+                <div class="space-y-6">
+                    <div>
+                        <label for="{{ form.emotion_notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Emotion Notes</label>
+                        {{ form.emotion_notes }}
+                        {% if form.emotion_notes.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.emotion_notes.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.learning_notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Learning Notes</label>
+                        {{ form.learning_notes }}
+                        {% if form.learning_notes.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.learning_notes.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="border-t border-gray-200 pt-6 flex justify-end space-x-4">
+                <a href="{% if trade %}{% url 'trade_detail' trade.pk %}{% else %}{% url 'trade_list' %}{% endif %}" 
+                   class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                    {% if trade %}Update Trade{% else %}Add Trade{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-calculate P&L when entry/exit prices change
+    document.addEventListener('DOMContentLoaded', function() {
+        const entryPriceInput = document.getElementById('id_entry_price');
+        const exitPriceInput = document.getElementById('id_exit_price');
+        const quantityInput = document.getElementById('id_quantity');
+        const profitLossInput = document.getElementById('id_profit_loss');
+        const percentageInput = document.getElementById('id_percentage_gain_loss');
+        const tradeTypeSelect = document.getElementById('id_trade_type');
+
+        function calculatePnL() {
+            console.log('Calculating P&L...');
+            
+            if (entryPriceInput && exitPriceInput && quantityInput && profitLossInput && percentageInput && tradeTypeSelect) {
+                const entryPrice = parseFloat(entryPriceInput.value) || 0;
+                const exitPrice = parseFloat(exitPriceInput.value) || 0;
+                const quantity = parseInt(quantityInput.value) || 0;
+                const tradeType = tradeTypeSelect.value;
+
+                console.log('Entry Price:', entryPrice);
+                console.log('Exit Price:', exitPrice);
+                console.log('Quantity:', quantity);
+                console.log('Trade Type:', tradeType);
+
+                if (entryPrice > 0 && exitPrice > 0 && quantity > 0 && tradeType) {
+                    let profitLoss;
+                    
+                    if (tradeType === 'LONG') {
+                        // For LONG: Profit = (Exit Price - Entry Price) * Quantity
+                        profitLoss = (exitPrice - entryPrice) * quantity;
+                    } else if (tradeType === 'SHORT') {
+                        // For SHORT: Profit = (Entry Price - Exit Price) * Quantity
+                        profitLoss = (entryPrice - exitPrice) * quantity;
+                    } else {
+                        profitLoss = 0;
+                    }
+
+                    // Calculate percentage: (Profit/Loss / Total Investment) * 100
+                    const totalInvestment = entryPrice * quantity;
+                    const percentage = totalInvestment > 0 ? ((profitLoss / totalInvestment) * 100) : 0;
+
+                    console.log('Calculated P&L:', profitLoss);
+                    console.log('Calculated Percentage:', percentage);
+
+                    // Update the input fields
+                    profitLossInput.value = profitLoss.toFixed(2);
+                    percentageInput.value = percentage.toFixed(2);
+
+                    // Add visual feedback
+                    const pnlStatus = document.getElementById('pnl-status');
+                    const pnlText = document.getElementById('pnl-text');
+                    
+                    if (profitLoss > 0) {
+                        profitLossInput.style.color = '#10B981'; // Green for profit
+                        percentageInput.style.color = '#10B981';
+                        pnlText.innerHTML = '<i class="fas fa-arrow-up text-green-500 mr-1"></i>Profit: +₹' + profitLoss.toFixed(2);
+                        pnlText.className = 'text-green-600';
+                        pnlStatus.classList.remove('hidden');
+                    } else if (profitLoss < 0) {
+                        profitLossInput.style.color = '#EF4444'; // Red for loss
+                        percentageInput.style.color = '#EF4444';
+                        pnlText.innerHTML = '<i class="fas fa-arrow-down text-red-500 mr-1"></i>Loss: ₹' + profitLoss.toFixed(2);
+                        pnlText.className = 'text-red-600';
+                        pnlStatus.classList.remove('hidden');
+                    } else {
+                        profitLossInput.style.color = '#6B7280'; // Gray for break-even
+                        percentageInput.style.color = '#6B7280';
+                        pnlText.innerHTML = '<i class="fas fa-minus text-gray-500 mr-1"></i>Break-even: ₹0.00';
+                        pnlText.className = 'text-gray-600';
+                        pnlStatus.classList.remove('hidden');
+                    }
+                } else {
+                    // Clear fields if not enough data
+                    profitLossInput.value = '';
+                    percentageInput.value = '';
+                    profitLossInput.style.color = '#6B7280';
+                    percentageInput.style.color = '#6B7280';
+                    const pnlStatus = document.getElementById('pnl-status');
+                    if (pnlStatus) {
+                        pnlStatus.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        // Add event listeners for auto-calculation
+        if (entryPriceInput) {
+            entryPriceInput.addEventListener('input', calculatePnL);
+            entryPriceInput.addEventListener('change', calculatePnL);
+        }
+        if (exitPriceInput) {
+            exitPriceInput.addEventListener('input', calculatePnL);
+            exitPriceInput.addEventListener('change', calculatePnL);
+        }
+        if (quantityInput) {
+            quantityInput.addEventListener('input', calculatePnL);
+            quantityInput.addEventListener('change', calculatePnL);
+        }
+        if (tradeTypeSelect) {
+            tradeTypeSelect.addEventListener('change', calculatePnL);
+        }
+
+        // Calculate on page load if values are already present
+        setTimeout(calculatePnL, 100);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+        </div>
+        
+        <form method="post" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            <!-- Week Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.week_start_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Week Start Date *</label>
+                    {{ form.week_start_date }}
+                    {% if form.week_start_date.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.week_start_date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="{{ form.week_end_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Week End Date *</label>
+                    {{ form.week_end_date }}
+                    {% if form.week_end_date.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.week_end_date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Review Questions -->
+            <div class="space-y-6">
+                <div>
+                    <label for="{{ form.what_went_well.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">What went well this week? *</label>
+                    {{ form.what_went_well }}
+                    {% if form.what_went_well.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.what_went_well.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Describe your successful trades, good decisions, and positive outcomes.</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.mistakes_repeated.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">What mistakes did I repeat? *</label>
+                    {{ form.mistakes_repeated }}
+                    {% if form.mistakes_repeated.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.mistakes_repeated.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Identify patterns in your losing trades and repeated errors.</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.best_setup.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Which setup worked best? *</label>
+                    {{ form.best_setup }}
+                    {% if form.best_setup.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.best_setup.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Analyze which trading setups were most profitable this week.</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.improvements_next_week.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">What will I improve next week? *</label>
+                    {{ form.improvements_next_week }}
+                    {% if form.improvements_next_week.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.improvements_next_week.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Set specific goals and improvements for the upcoming week.</p>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="border-t border-gray-200 pt-6 flex justify-end space-x-4">
+                <a href="{% url 'weekly_reviews' %}" 
+                   class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                    Save Weekly Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

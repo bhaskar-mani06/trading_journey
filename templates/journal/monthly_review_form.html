@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+        </div>
+        
+        <form method="post" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            <!-- Month Information -->
+            <div>
+                <label for="{{ form.month.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Month *</label>
+                {{ form.month }}
+                {% if form.month.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.month.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">Select the month you're reviewing (first day of the month).</p>
+            </div>
+
+            <!-- Review Questions -->
+            <div class="space-y-6">
+                <div>
+                    <label for="{{ form.monthly_summary.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Monthly Summary *</label>
+                    {{ form.monthly_summary }}
+                    {% if form.monthly_summary.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.monthly_summary.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Provide an overall summary of your trading performance this month.</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.key_achievements.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Key Achievements *</label>
+                    {{ form.key_achievements }}
+                    {% if form.key_achievements.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.key_achievements.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Highlight your biggest wins, successful strategies, and personal milestones.</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.major_mistakes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Major Mistakes and Lessons *</label>
+                    {{ form.major_mistakes }}
+                    {% if form.major_mistakes.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.major_mistakes.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Identify your biggest losses, recurring mistakes, and key lessons learned.</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.strategy_improvements.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Strategy Improvements Made *</label>
+                    {{ form.strategy_improvements }}
+                    {% if form.strategy_improvements.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.strategy_improvements.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Describe any changes you made to your trading approach, risk management, or analysis methods.</p>
+                </div>
+                
+                <div>
+                    <label for="{{ form.goals_next_month.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Goals for Next Month *</label>
+                    {{ form.goals_next_month }}
+                    {% if form.goals_next_month.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.goals_next_month.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-sm text-gray-500">Set specific, measurable goals for the upcoming month based on your analysis.</p>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="border-t border-gray-200 pt-6 flex justify-end space-x-4">
+                <a href="{% url 'monthly_reviews' %}" 
+                   class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                    Save Monthly Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

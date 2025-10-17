@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if psychology %}Edit{% else %}Add{% endif %} Psychology Record - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-2xl p-8 text-white">
+        <h1 class="text-3xl font-bold mb-2">
+            🧠 {% if psychology %}Edit{% else %}Add{% endif %} Psychology Record
+        </h1>
+        <p class="text-purple-100 text-lg">
+            Track your emotions and mental state for better trading decisions
+        </p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Date -->
+            <div>
+                <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <i class="fas fa-calendar mr-2"></i>Date
+                </label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                    <div class="text-red-600 text-sm mt-1">{{ form.date.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Pre-Trade Section -->
+            <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-play mr-2 text-blue-600"></i>Pre-Trade State
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="{{ form.pre_trade_emotion.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Emotion
+                        </label>
+                        {{ form.pre_trade_emotion }}
+                        {% if form.pre_trade_emotion.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.pre_trade_emotion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.pre_trade_confidence.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Confidence Level (1-10)
+                        </label>
+                        {{ form.pre_trade_confidence }}
+                        {% if form.pre_trade_confidence.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.pre_trade_confidence.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.pre_trade_stress_level.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Stress Level (1-10)
+                        </label>
+                        {{ form.pre_trade_stress_level }}
+                        {% if form.pre_trade_stress_level.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.pre_trade_stress_level.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- During Trade Section -->
+            <div class="bg-yellow-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-chart-line mr-2 text-yellow-600"></i>During Trade State
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.during_trade_emotion.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Emotion
+                        </label>
+                        {{ form.during_trade_emotion }}
+                        {% if form.during_trade_emotion.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.during_trade_emotion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.during_trade_confidence.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Confidence Level (1-10)
+                        </label>
+                        {{ form.during_trade_confidence }}
+                        {% if form.during_trade_confidence.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.during_trade_confidence.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post-Trade Section -->
+            <div class="bg-green-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-stop mr-2 text-green-600"></i>Post-Trade State
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="{{ form.post_trade_emotion.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Emotion
+                        </label>
+                        {{ form.post_trade_emotion }}
+                        {% if form.post_trade_emotion.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.post_trade_emotion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.post_trade_confidence.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Confidence Level (1-10)
+                        </label>
+                        {{ form.post_trade_confidence }}
+                        {% if form.post_trade_confidence.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.post_trade_confidence.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.post_trade_satisfaction.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Satisfaction (1-10)
+                        </label>
+                        {{ form.post_trade_satisfaction }}
+                        {% if form.post_trade_satisfaction.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.post_trade_satisfaction.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mental State Section -->
+            <div class="bg-purple-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-brain mr-2 text-purple-600"></i>Mental State
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="{{ form.sleep_quality.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Sleep Quality (1-10)
+                        </label>
+                        {{ form.sleep_quality }}
+                        {% if form.sleep_quality.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.sleep_quality.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.stress_level.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Overall Stress Level (1-10)
+                        </label>
+                        {{ form.stress_level }}
+                        {% if form.stress_level.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.stress_level.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.focus_level.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Focus Level (1-10)
+                        </label>
+                        {{ form.focus_level }}
+                        {% if form.focus_level.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.focus_level.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    <i class="fas fa-sticky-note mr-2 text-gray-600"></i>Notes
+                </h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label for="{{ form.mental_notes.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Mental State Observations
+                        </label>
+                        {{ form.mental_notes }}
+                        {% if form.mental_notes.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.mental_notes.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.improvement_notes.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Areas for Mental Improvement
+                        </label>
+                        {{ form.improvement_notes }}
+                        {% if form.improvement_notes.errors %}
+                            <div class="text-red-600 text-sm mt-1">{{ form.improvement_notes.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-wrap gap-4 pt-6">
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-save mr-2"></i>{% if psychology %}Update{% else %}Save{% endif %} Record
+                </button>
+                <a href="{% url 'psychology_dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
