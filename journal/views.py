@@ -9,7 +9,6 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Trade, WeeklyReview, MonthlyReview, TradingPsychology, TradingGoal, MarketCondition, TradingHabit
 from .forms import TradeForm, WeeklyReviewForm, MonthlyReviewForm, TradeFilterForm, CustomUserCreationForm, TradingPsychologyForm, TradingGoalForm, MarketConditionForm, TradingHabitForm
-# Local development - no external dependencies
 import json
 import csv
 import io
@@ -64,40 +63,46 @@ def home_view(request):
 
 @login_required
 def dashboard(request):
-    """Main dashboard with analytics and performance metrics"""
-    user_trades = Trade.objects.filter(user=request.user)
+    """Main dashboard with analytics and performance metrics - OPTIMIZED"""
+    # Get all stats in one optimized call
+    stats = Trade.get_dashboard_stats(request.user)
+    
+    # Extract stats
+    basic_stats = stats['basic_stats']
+    today_stats = stats['today_stats']
+    week_stats = stats['week_stats']
     
     # Basic statistics
-    total_trades = user_trades.count()
-    winning_trades = user_trades.filter(profit_loss__gt=0).count()
-    losing_trades = user_trades.filter(profit_loss__lt=0).count()
+    total_trades = basic_stats['total_trades']
+    winning_trades = basic_stats['winning_trades']
+    losing_trades = basic_stats['losing_trades']
     win_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0
     
     # P&L statistics
-    total_pnl = user_trades.aggregate(total=Sum('profit_loss'))['total'] or 0
-    avg_profit = user_trades.filter(profit_loss__gt=0).aggregate(avg=Avg('profit_loss'))['avg'] or 0
-    avg_loss = user_trades.filter(profit_loss__lt=0).aggregate(avg=Avg('profit_loss'))['avg'] or 0
+    total_pnl = basic_stats['total_pnl'] or 0
+    avg_profit = basic_stats['avg_profit'] or 0
+    avg_loss = basic_stats['avg_loss'] or 0
     
     # Streak tracking
-    current_win_streak = Trade.get_current_win_streak(request.user)
-    current_loss_streak = Trade.get_current_loss_streak(request.user)
-    max_win_streak = Trade.get_max_win_streak(request.user)
-    max_loss_streak = Trade.get_max_loss_streak(request.user)
+    current_win_streak = stats['current_win_streak']
+    current_loss_streak = stats['current_loss_streak']
+    max_win_streak = stats['max_win_streak']
+    max_loss_streak = stats['max_loss_streak']
     
     # Today's P&L
-    today = timezone.now().date()
-    today_trades = user_trades.filter(date=today)
-    today_pnl = today_trades.aggregate(total=Sum('profit_loss'))['total'] or 0
-    today_trades_count = today_trades.count()
+    today_pnl = today_stats['today_pnl'] or 0
+    today_trades_count = today_stats['today_trades_count']
     
     # This week's performance
-    week_start = today - timedelta(days=today.weekday())
-    week_trades = user_trades.filter(date__gte=week_start)
-    week_pnl = week_trades.aggregate(total=Sum('profit_loss'))['total'] or 0
-    week_trades_count = week_trades.count()
-    week_win_rate = (week_trades.filter(profit_loss__gt=0).count() / week_trades_count * 100) if week_trades_count > 0 else 0
+    week_pnl = week_stats['week_pnl'] or 0
+    week_trades_count = week_stats['week_trades_count']
+    week_winning_trades = week_stats['week_winning_trades']
+    week_win_rate = (week_winning_trades / week_trades_count * 100) if week_trades_count > 0 else 0
     
-    # Best/Worst performing symbols
+    # Get user trades for additional queries (optimized)
+    user_trades = Trade.objects.filter(user=request.user)
+    
+    # Best/Worst performing symbols - OPTIMIZED
     symbol_performance = user_trades.values('symbol').annotate(
         count=Count('id'),
         total_pnl=Sum('profit_loss'),
@@ -108,45 +113,50 @@ def dashboard(request):
     best_symbols = symbol_performance[:5]
     worst_symbols = symbol_performance.filter(total_pnl__lt=0).order_by('total_pnl')[:5]
     
-    # Favorite symbols (most traded)
+    # Favorite symbols (most traded) - OPTIMIZED
     favorite_symbols = user_trades.values('symbol').annotate(
         trade_count=Count('id')
     ).order_by('-trade_count')[:10]
     
-    # Recent trades
-    recent_trades = user_trades.order_by('-date', '-created_at')[:5]
+    # Recent trades - OPTIMIZED with select_related
+    recent_trades = user_trades.select_related('user').order_by('-date', '-created_at')[:5]
     
-    # Monthly performance data for charts
+    # Monthly performance data for charts - OPTIMIZED
     monthly_data = []
+    today = timezone.now().date()
     for i in range(6):  # Last 6 months
-        month_start = timezone.now().replace(day=1) - timedelta(days=30*i)
+        month_start = today.replace(day=1) - timedelta(days=30*i)
         month_end = month_start.replace(day=28) + timedelta(days=4)
         month_end = month_end - timedelta(days=month_end.day)
         
-        month_trades = user_trades.filter(date__gte=month_start, date__lte=month_end)
-        month_pnl = month_trades.aggregate(total=Sum('profit_loss'))['total'] or 0
+        month_stats = user_trades.filter(date__gte=month_start, date__lte=month_end).aggregate(
+            total_pnl=Sum('profit_loss'),
+            trade_count=Count('id')
+        )
         
         monthly_data.append({
             'month': month_start.strftime('%b %Y'),
-            'pnl': month_pnl,
-            'trades': month_trades.count()
+            'pnl': month_stats['total_pnl'] or 0,
+            'trades': month_stats['trade_count']
         })
     
     monthly_data.reverse()
     
-    # Setup performance
+    # Setup performance - OPTIMIZED
     setup_performance = user_trades.values('setup_type').annotate(
         count=Count('id'),
         total_pnl=Sum('profit_loss'),
         avg_pnl=Avg('profit_loss')
     ).order_by('-total_pnl')
     
-    # Risk-reward analysis
+    # Risk-reward analysis - OPTIMIZED
     trades_with_rr = user_trades.exclude(stop_loss=0).exclude(target_price=0)
     avg_risk_reward = 0
     if trades_with_rr.exists():
+        # Limit to recent trades for performance
+        recent_rr_trades = trades_with_rr.order_by('-date')[:100]
         rr_ratios = []
-        for trade in trades_with_rr:
+        for trade in recent_rr_trades:
             rr = trade.get_risk_reward_ratio()
             if rr:
                 rr_ratios.append(rr)

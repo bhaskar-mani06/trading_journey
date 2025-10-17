@@ -43,7 +43,7 @@ class TradeForm(forms.ModelForm):
     class Meta:
         model = Trade
         fields = [
-            'date', 'symbol', 'trade_type', 'trade_status', 'entry_price', 'exit_price', 'quantity',
+            'date', 'symbol', 'trade_type', 'entry_price', 'exit_price', 'quantity',
             'stop_loss', 'target_price', 'exit_reason', 'profit_loss', 'percentage_gain_loss',
             'setup_type', 'confidence_level', 'screenshot_before', 'screenshot_after',
             'emotion_notes', 'learning_notes'
@@ -52,7 +52,6 @@ class TradeForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
             'symbol': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'placeholder': 'e.g., RELIANCE, TCS, INFY, HDFCBANK'}),
             'trade_type': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
-            'trade_status': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
             'entry_price': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01'}),
             'exit_price': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01'}),
             'quantity': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'min': '1'}),
