@@ -57,4 +57,7 @@ urlpatterns = [
     # Advanced Analytics
     path('analytics/portfolio-heatmap/', views.portfolio_heatmap, name='portfolio_heatmap'),
     path('analytics/confidence-performance/', views.confidence_performance, name='confidence_performance'),
+    
+    # Test view
+    path('test/', views.test_view, name='test'),
 ]

@@ -1313,3 +1313,7 @@ def confidence_performance(request):
     }
     
     return render(request, 'journal/confidence_performance.html', context)
+
+def test_view(request):
+    """Simple test view without database"""
+    return HttpResponse("Test view working! Database connection not required.")
