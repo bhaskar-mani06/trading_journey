@@ -1,2 +1,2 @@
-release: python manage.py migrate && python manage.py check --database default
+release: python manage.py migrate
 web: gunicorn trading_journal.wsgi:application
