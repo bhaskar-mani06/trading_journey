@@ -1,18 +1,20 @@
-# Render Production Environment Variables
+# Environment Variables for Render Deployment
 # Copy these to Render Dashboard → Environment Variables
 
-SECRET_KEY=your-secret-key-here-change-this
+# Django Settings
+SECRET_KEY=your-super-secret-key-change-this-in-production
 DEBUG=False
 ALLOWED_HOSTS=your-app-name.onrender.com
+CSRF_TRUSTED_ORIGINS=https://your-app-name.onrender.com
 
-# Supabase Database Settings
+# Supabase Database Configuration
 DB_NAME=postgres
 DB_USER=postgres
-DB_PASSWORD=your-supabase-password
-DB_HOST=db.nqjvhriwceldhkkkinba.supabase.co
+DB_PASSWORD=your-supabase-password-here
+DB_HOST=db.your-project-ref.supabase.co
 DB_PORT=5432
 
-# Email Settings (Optional)
+# Email Configuration (Optional)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
