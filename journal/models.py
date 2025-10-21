@@ -10,6 +10,12 @@ class Trade(models.Model):
         ('SHORT', 'Short'),
     ]
     
+    TRADE_STATUS_CHOICES = [
+        ('OPEN', 'Open'),
+        ('CLOSED', 'Closed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    
     SETUP_TYPE_CHOICES = [
         ('BREAKOUT', 'Breakout'),
         ('PULLBACK', 'Pullback'),
@@ -37,6 +43,11 @@ class Trade(models.Model):
     date = models.DateField(help_text="The day the trade was taken")
     symbol = models.CharField(max_length=20, help_text="Stock, forex pair, or asset name")
     trade_type = models.CharField(max_length=5, choices=TRADE_TYPE_CHOICES)
+    trade_status = models.CharField(max_length=10, choices=TRADE_STATUS_CHOICES, default='OPEN', help_text="Current status of the trade")
+    
+    # Time information
+    entry_time = models.TimeField(default='09:30:00', help_text="Time when trade was entered")
+    exit_time = models.TimeField(blank=True, null=True, help_text="Time when trade was exited")
     
     # Price information
     entry_price = models.FloatField(validators=[MinValueValidator(0)], help_text="Entry price of the trade")
@@ -46,6 +57,7 @@ class Trade(models.Model):
     # Risk management
     stop_loss = models.FloatField(validators=[MinValueValidator(0)], help_text="Defined stop loss")
     target_price = models.FloatField(validators=[MinValueValidator(0)], help_text="Take profit level")
+    risk_per_trade = models.FloatField(default=1.0, validators=[MinValueValidator(0), MaxValueValidator(100)], help_text="Risk percentage per trade")
     
     # Results
     exit_reason = models.TextField(help_text="Reason for exiting the trade")
@@ -273,6 +285,185 @@ class Trade(models.Model):
             'max_win_streak': max_win_streak,
             'max_loss_streak': max_loss_streak,
         }
+    
+    @classmethod
+    def get_sharpe_ratio(cls, user, risk_free_rate=0.02):
+        """Calculate Sharpe Ratio for risk-adjusted returns"""
+        import statistics
+        
+        user_trades = cls.objects.filter(user=user, trade_status='CLOSED').order_by('date')
+        
+        if not user_trades.exists():
+            return None
+        
+        # Get percentage returns
+        returns = [trade.percentage_gain_loss for trade in user_trades]
+        
+        if len(returns) < 2:
+            return None
+        
+        # Calculate average return and standard deviation
+        avg_return = statistics.mean(returns)
+        std_dev = statistics.stdev(returns)
+        
+        if std_dev == 0:
+            return None
+        
+        # Annualize the returns (assuming daily returns)
+        annualized_return = avg_return * 252  # 252 trading days
+        annualized_std = std_dev * (252 ** 0.5)
+        
+        # Calculate Sharpe Ratio
+        sharpe_ratio = (annualized_return - risk_free_rate) / annualized_std
+        
+        return round(sharpe_ratio, 4)
+    
+    @classmethod
+    def get_maximum_drawdown(cls, user):
+        """Calculate Maximum Drawdown percentage"""
+        user_trades = cls.objects.filter(user=user, trade_status='CLOSED').order_by('date')
+        
+        if not user_trades.exists():
+            return None
+        
+        # Calculate cumulative P&L
+        cumulative_pnl = 0
+        peak_pnl = 0
+        max_drawdown = 0
+        
+        for trade in user_trades:
+            cumulative_pnl += trade.profit_loss
+            
+            # Update peak if we hit a new high
+            if cumulative_pnl > peak_pnl:
+                peak_pnl = cumulative_pnl
+            
+            # Calculate current drawdown from peak
+            current_drawdown = peak_pnl - cumulative_pnl
+            
+            # Update maximum drawdown if this is worse
+            if current_drawdown > max_drawdown:
+                max_drawdown = current_drawdown
+        
+        # Convert to percentage if we have a peak
+        if peak_pnl > 0:
+            max_drawdown_pct = (max_drawdown / peak_pnl) * 100
+            return round(max_drawdown_pct, 2)
+        
+        return round(max_drawdown, 2)
+    
+    @classmethod
+    def get_portfolio_heatmap_data(cls, user):
+        """Get portfolio heatmap data for symbols and time periods"""
+        from django.db.models import Count, Sum, Avg, Q
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        user_trades = cls.objects.filter(user=user, trade_status='CLOSED')
+        
+        # Get data for last 30 days
+        thirty_days_ago = timezone.now().date() - timedelta(days=30)
+        recent_trades = user_trades.filter(date__gte=thirty_days_ago)
+        
+        # Symbol performance data
+        symbol_data = {}
+        for trade in recent_trades:
+            symbol = trade.symbol
+            if symbol not in symbol_data:
+                symbol_data[symbol] = {
+                    'total_trades': 0,
+                    'winning_trades': 0,
+                    'total_pnl': 0,
+                    'avg_confidence': 0,
+                    'confidence_sum': 0
+                }
+            
+            symbol_data[symbol]['total_trades'] += 1
+            symbol_data[symbol]['total_pnl'] += trade.profit_loss
+            symbol_data[symbol]['confidence_sum'] += trade.confidence_level
+            
+            if trade.profit_loss > 0:
+                symbol_data[symbol]['winning_trades'] += 1
+        
+        # Calculate metrics for each symbol
+        heatmap_data = []
+        for symbol, data in symbol_data.items():
+            win_rate = (data['winning_trades'] / data['total_trades'] * 100) if data['total_trades'] > 0 else 0
+            avg_confidence = data['confidence_sum'] / data['total_trades'] if data['total_trades'] > 0 else 0
+            
+            heatmap_data.append({
+                'symbol': symbol,
+                'total_trades': data['total_trades'],
+                'winning_trades': data['winning_trades'],
+                'win_rate': round(win_rate, 2),
+                'total_pnl': round(data['total_pnl'], 2),
+                'avg_confidence': round(avg_confidence, 2),
+                'avg_pnl_per_trade': round(data['total_pnl'] / data['total_trades'], 2) if data['total_trades'] > 0 else 0
+            })
+        
+        # Sort by total P&L
+        heatmap_data.sort(key=lambda x: x['total_pnl'], reverse=True)
+        
+        return heatmap_data
+    
+    @classmethod
+    def get_confidence_vs_performance_data(cls, user):
+        """Get confidence level vs actual performance analysis"""
+        from django.db.models import Count, Sum, Avg, Q
+        
+        user_trades = cls.objects.filter(user=user, trade_status='CLOSED')
+        
+        # Group trades by confidence level
+        confidence_data = {}
+        for trade in user_trades:
+            confidence = trade.confidence_level
+            if confidence not in confidence_data:
+                confidence_data[confidence] = {
+                    'trades': [],
+                    'total_trades': 0,
+                    'winning_trades': 0,
+                    'total_pnl': 0,
+                    'avg_pnl': 0
+                }
+            
+            confidence_data[confidence]['trades'].append(trade)
+            confidence_data[confidence]['total_trades'] += 1
+            confidence_data[confidence]['total_pnl'] += trade.profit_loss
+            
+            if trade.profit_loss > 0:
+                confidence_data[confidence]['winning_trades'] += 1
+        
+        # Calculate performance metrics for each confidence level
+        performance_data = []
+        for confidence in range(1, 11):  # Confidence levels 1-10
+            if confidence in confidence_data:
+                data = confidence_data[confidence]
+                win_rate = (data['winning_trades'] / data['total_trades'] * 100) if data['total_trades'] > 0 else 0
+                avg_pnl = data['total_pnl'] / data['total_trades'] if data['total_trades'] > 0 else 0
+                
+                performance_data.append({
+                    'confidence_level': confidence,
+                    'total_trades': data['total_trades'],
+                    'winning_trades': data['winning_trades'],
+                    'win_rate': round(win_rate, 2),
+                    'total_pnl': round(data['total_pnl'], 2),
+                    'avg_pnl': round(avg_pnl, 2),
+                    'avg_win': round(sum(t.profit_loss for t in data['trades'] if t.profit_loss > 0) / data['winning_trades'], 2) if data['winning_trades'] > 0 else 0,
+                    'avg_loss': round(sum(t.profit_loss for t in data['trades'] if t.profit_loss < 0) / (data['total_trades'] - data['winning_trades']), 2) if (data['total_trades'] - data['winning_trades']) > 0 else 0
+                })
+            else:
+                performance_data.append({
+                    'confidence_level': confidence,
+                    'total_trades': 0,
+                    'winning_trades': 0,
+                    'win_rate': 0,
+                    'total_pnl': 0,
+                    'avg_pnl': 0,
+                    'avg_win': 0,
+                    'avg_loss': 0
+                })
+        
+        return performance_data
 
 
 class WeeklyReview(models.Model):
@@ -507,6 +698,8 @@ class TradingHabit(models.Model):
     frequency = models.CharField(max_length=50, help_text="Daily, Weekly, etc.")
     target_count = models.IntegerField(default=1, help_text="Target occurrences")
     current_count = models.IntegerField(default=0)
+    streak_count = models.IntegerField(default=0, help_text="Current streak count")
+    last_performed_date = models.DateField(blank=True, null=True, help_text="Last date when habit was performed")
     
     # Dates
     start_date = models.DateField()
@@ -529,3 +722,83 @@ class TradingHabit(models.Model):
         if self.target_count > 0:
             return min((self.current_count / self.target_count) * 100, 100)
         return 0
+
+
+class RiskManagement(models.Model):
+    """Risk management rules and limits"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='risk_management')
+    
+    # Daily limits
+    max_daily_loss = models.FloatField(default=1000, help_text="Maximum daily loss limit")
+    max_daily_trades = models.IntegerField(default=10, help_text="Maximum trades per day")
+    
+    # Position sizing
+    max_position_size = models.FloatField(default=10000, help_text="Maximum position size")
+    max_risk_per_trade = models.FloatField(default=2.0, validators=[MinValueValidator(0), MaxValueValidator(100)], help_text="Maximum risk percentage per trade")
+    
+    # Portfolio limits
+    max_portfolio_risk = models.FloatField(default=10.0, validators=[MinValueValidator(0), MaxValueValidator(100)], help_text="Maximum portfolio risk percentage")
+    max_correlation_exposure = models.FloatField(default=30.0, validators=[MinValueValidator(0), MaxValueValidator(100)], help_text="Maximum correlation exposure percentage")
+    
+    # Drawdown limits
+    max_drawdown_limit = models.FloatField(default=15.0, validators=[MinValueValidator(0), MaxValueValidator(100)], help_text="Maximum drawdown limit percentage")
+    stop_trading_drawdown = models.FloatField(default=20.0, validators=[MinValueValidator(0), MaxValueValidator(100)], help_text="Stop trading at this drawdown percentage")
+    
+    # Time-based limits
+    max_trading_hours_per_day = models.IntegerField(default=8, help_text="Maximum trading hours per day")
+    mandatory_break_duration = models.IntegerField(default=30, help_text="Mandatory break duration in minutes")
+    
+    # Risk alerts
+    enable_loss_alerts = models.BooleanField(default=True, help_text="Enable loss alerts")
+    enable_drawdown_alerts = models.BooleanField(default=True, help_text="Enable drawdown alerts")
+    enable_position_size_alerts = models.BooleanField(default=True, help_text="Enable position size alerts")
+    
+    # Status
+    is_active = models.BooleanField(default=True, help_text="Is this risk management active")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - Risk Management Rules"
+    
+    def check_daily_loss_limit(self, current_loss):
+        """Check if daily loss limit is exceeded"""
+        return current_loss >= self.max_daily_loss
+    
+    def check_position_size_limit(self, position_size):
+        """Check if position size exceeds limit"""
+        return position_size > self.max_position_size
+    
+    def check_risk_per_trade_limit(self, risk_percentage):
+        """Check if risk per trade exceeds limit"""
+        return risk_percentage > self.max_risk_per_trade
+    
+    def get_risk_status(self):
+        """Get current risk status"""
+        from django.utils import timezone
+        from .models import Trade
+        
+        today = timezone.now().date()
+        today_trades = Trade.objects.filter(user=self.user, date=today)
+        
+        # Calculate today's loss
+        today_loss = sum(trade.profit_loss for trade in today_trades if trade.profit_loss < 0)
+        
+        # Calculate current drawdown
+        current_drawdown = Trade.get_maximum_drawdown(self.user) or 0
+        
+        status = {
+            'daily_loss_exceeded': self.check_daily_loss_limit(abs(today_loss)),
+            'daily_trades_exceeded': today_trades.count() >= self.max_daily_trades,
+            'drawdown_exceeded': current_drawdown >= self.max_drawdown_limit,
+            'stop_trading': current_drawdown >= self.stop_trading_drawdown,
+            'current_daily_loss': today_loss,
+            'current_drawdown': current_drawdown,
+            'trades_today': today_trades.count()
+        }
+        
+        return status

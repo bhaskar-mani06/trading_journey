@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+            <p class="text-gray-600 mt-2">Performance analysis of your trading symbols (Last 30 days)</p>
+        </div>
+        
+        <div class="p-6">
+            {% if heatmap_data %}
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-blue-800">Total Symbols</h3>
+                        <p class="text-2xl font-bold text-blue-900">{{ heatmap_data|length }}</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-green-800">Profitable Symbols</h3>
+                        <p class="text-2xl font-bold text-green-900">
+                            {{ heatmap_data|length|add:"-1"|add:"1" }}
+                            {% for data in heatmap_data %}
+                                {% if data.total_pnl > 0 %}{{ forloop.counter0|add:"1" }}{% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-purple-800">Total Trades</h3>
+                        <p class="text-2xl font-bold text-purple-900">
+                            {% for data in heatmap_data %}
+                                {{ data.total_trades|add:forloop.counter0 }}
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-orange-800">Total P&L</h3>
+                        <p class="text-2xl font-bold text-orange-900">
+                            ₹{% for data in heatmap_data %}{{ data.total_pnl|add:forloop.counter0 }}{% endfor %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Heat Map Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Trades</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Win Rate</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total P&L</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg P&L/Trade</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Confidence</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for data in heatmap_data %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ data.symbol }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ data.total_trades }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="text-sm text-gray-900">{{ data.win_rate }}%</div>
+                                        <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-green-500 h-2 rounded-full" style="width: {{ data.win_rate }}%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium {% if data.total_pnl > 0 %}text-green-600{% elif data.total_pnl < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                                        ₹{{ data.total_pnl }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm {% if data.avg_pnl_per_trade > 0 %}text-green-600{% elif data.avg_pnl_per_trade < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                                        ₹{{ data.avg_pnl_per_trade }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="text-sm text-gray-900">{{ data.avg_confidence }}/10</div>
+                                        <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-500 h-2 rounded-full" style="width: {{ data.avg_confidence|floatformat:0|add:"0" }}0%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if data.total_pnl > 0 %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-arrow-up mr-1"></i>Profitable
+                                        </span>
+                                    {% elif data.total_pnl < 0 %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-arrow-down mr-1"></i>Loss
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-minus mr-1"></i>Break-even
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Visual Heat Map -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Visual Performance Heat Map</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {% for data in heatmap_data %}
+                        <div class="text-center">
+                            <div class="p-4 rounded-lg border-2 {% if data.total_pnl > 0 %}border-green-300 bg-green-50{% elif data.total_pnl < 0 %}border-red-300 bg-red-50{% else %}border-gray-300 bg-gray-50{% endif %}">
+                                <div class="text-sm font-medium text-gray-900">{{ data.symbol }}</div>
+                                <div class="text-xs text-gray-600 mt-1">{{ data.total_trades }} trades</div>
+                                <div class="text-lg font-bold {% if data.total_pnl > 0 %}text-green-600{% elif data.total_pnl < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                                    ₹{{ data.total_pnl }}
+                                </div>
+                                <div class="text-xs text-gray-500">{{ data.win_rate }}% win rate</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-chart-heat text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Trading Data Available</h3>
+                    <p class="text-gray-600 mb-6">Start trading to see your portfolio heat map analysis.</p>
+                    <a href="{% url 'trade_create' %}" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                        Add Your First Trade
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add interactive features if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effects or other interactions
+        console.log('Portfolio Heat Map loaded');
+    });
+</script>
+{% endblock %}

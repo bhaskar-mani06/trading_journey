@@ -40,11 +40,42 @@
                 </div>
                 
                 <div>
+                    <label for="{{ form.trade_status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Trade Status *</label>
+                    {{ form.trade_status }}
+                    {% if form.trade_status.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.trade_status.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
                     <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
                     {{ form.quantity }}
                     {% if form.quantity.errors %}
                         <p class="mt-1 text-sm text-red-600">{{ form.quantity.errors.0 }}</p>
                     {% endif %}
+                </div>
+            </div>
+
+            <!-- Time Information -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Time Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.entry_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Entry Time *</label>
+                        {{ form.entry_time }}
+                        {% if form.entry_time.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.entry_time.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.exit_time.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Exit Time</label>
+                        {{ form.exit_time }}
+                        {% if form.exit_time.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.exit_time.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-sm text-gray-500">Leave empty if trade is still open</p>
+                    </div>
                 </div>
             </div>
 
@@ -73,7 +104,7 @@
             <!-- Risk Management -->
             <div class="border-t border-gray-200 pt-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Risk Management</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label for="{{ form.stop_loss.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Stop Loss *</label>
                         {{ form.stop_loss }}
@@ -88,6 +119,15 @@
                         {% if form.target_price.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ form.target_price.errors.0 }}</p>
                         {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.risk_per_trade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Risk Per Trade (%) *</label>
+                        {{ form.risk_per_trade }}
+                        {% if form.risk_per_trade.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.risk_per_trade.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-sm text-gray-500">Percentage of capital risked</p>
                     </div>
                 </div>
             </div>

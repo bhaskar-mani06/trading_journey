@@ -168,7 +168,21 @@
                 <span class="font-bold text-lg">View Analytics</span>
                 <span class="text-blue-100 text-sm mt-1">Deep insights</span>
             </a>
-            <a href="{% url 'monthly_summary' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in" style="animation-delay: 0.2s">
+            <a href="{% url 'portfolio_heatmap' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in" style="animation-delay: 0.15s">
+                <div class="text-4xl mb-4 group-hover:animate-pulse">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <span class="font-bold text-lg">Portfolio Heat Map</span>
+                <span class="text-orange-100 text-sm mt-1">Symbol performance</span>
+            </a>
+            <a href="{% url 'confidence_performance' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in" style="animation-delay: 0.2s">
+                <div class="text-4xl mb-4 group-hover:animate-pulse">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <span class="font-bold text-lg">Confidence Analysis</span>
+                <span class="text-indigo-100 text-sm mt-1">Confidence vs performance</span>
+            </a>
+            <a href="{% url 'monthly_summary' %}" class="group flex flex-col items-center justify-center px-6 py-8 bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-110 transition-all duration-500 animate-bounce-in" style="animation-delay: 0.25s">
                 <div class="text-4xl mb-4 group-hover:animate-float">
                     <i class="fas fa-calendar-alt"></i>
                 </div>

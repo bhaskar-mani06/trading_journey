@@ -7,8 +7,8 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import Trade, WeeklyReview, MonthlyReview, TradingPsychology, TradingGoal, MarketCondition, TradingHabit
-from .forms import TradeForm, WeeklyReviewForm, MonthlyReviewForm, TradeFilterForm, CustomUserCreationForm, TradingPsychologyForm, TradingGoalForm, MarketConditionForm, TradingHabitForm
+from .models import Trade, WeeklyReview, MonthlyReview, TradingPsychology, TradingGoal, MarketCondition, TradingHabit, RiskManagement
+from .forms import TradeForm, WeeklyReviewForm, MonthlyReviewForm, TradeFilterForm, CustomUserCreationForm, TradingPsychologyForm, TradingGoalForm, MarketConditionForm, TradingHabitForm, RiskManagementForm
 import json
 import csv
 import io
@@ -1279,3 +1279,37 @@ def tax_report(request):
     }
     
     return render(request, 'journal/tax_report.html', context)
+
+
+@login_required
+def portfolio_heatmap(request):
+    """Portfolio heatmap view showing symbol performance"""
+    heatmap_data = Trade.get_portfolio_heatmap_data(request.user)
+    
+    context = {
+        'heatmap_data': heatmap_data,
+        'title': 'Portfolio Heat Map'
+    }
+    
+    return render(request, 'journal/portfolio_heatmap.html', context)
+
+
+@login_required
+def confidence_performance(request):
+    """Confidence vs Performance analysis view"""
+    performance_data = Trade.get_confidence_vs_performance_data(request.user)
+    
+    # Calculate correlation between confidence and performance
+    confidence_levels = [data['confidence_level'] for data in performance_data if data['total_trades'] > 0]
+    win_rates = [data['win_rate'] for data in performance_data if data['total_trades'] > 0]
+    avg_pnls = [data['avg_pnl'] for data in performance_data if data['total_trades'] > 0]
+    
+    context = {
+        'performance_data': performance_data,
+        'confidence_levels': confidence_levels,
+        'win_rates': win_rates,
+        'avg_pnls': avg_pnls,
+        'title': 'Confidence vs Performance Analysis'
+    }
+    
+    return render(request, 'journal/confidence_performance.html', context)

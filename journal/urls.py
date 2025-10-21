@@ -53,4 +53,8 @@ urlpatterns = [
     # New Reports
     path('reports/monthly-summary/', views.monthly_summary, name='monthly_summary'),
     path('reports/tax-report/', views.tax_report, name='tax_report'),
+    
+    # Advanced Analytics
+    path('analytics/portfolio-heatmap/', views.portfolio_heatmap, name='portfolio_heatmap'),
+    path('analytics/confidence-performance/', views.confidence_performance, name='confidence_performance'),
 ]

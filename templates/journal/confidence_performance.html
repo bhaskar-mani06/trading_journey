@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+            <p class="text-gray-600 mt-2">Analyze how your confidence level correlates with actual trading performance</p>
+        </div>
+        
+        <div class="p-6">
+            {% if performance_data %}
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-blue-800">Total Confidence Levels</h3>
+                        <p class="text-2xl font-bold text-blue-900">{{ performance_data|length }}</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-green-800">Best Confidence Level</h3>
+                        <p class="text-2xl font-bold text-green-900">
+                            {% for data in performance_data %}
+                                {% if data.total_trades > 0 and data.win_rate == performance_data|length|add:"-1"|add:"1" %}
+                                    {{ data.confidence_level }}/10
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-purple-800">Total Trades Analyzed</h3>
+                        <p class="text-2xl font-bold text-purple-900">
+                            {% for data in performance_data %}
+                                {{ data.total_trades|add:forloop.counter0 }}
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-orange-800">Overall Win Rate</h3>
+                        <p class="text-2xl font-bold text-orange-900">
+                            {% for data in performance_data %}
+                                {{ data.win_rate|add:forloop.counter0 }}%
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Confidence vs Performance Chart -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Confidence Level vs Win Rate</h3>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <canvas id="confidenceChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Confidence Level</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Trades</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winning Trades</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Win Rate</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total P&L</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg P&L</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Win</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Loss</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for data in performance_data %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="text-sm font-medium text-gray-900">{{ data.confidence_level }}/10</div>
+                                        <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-500 h-2 rounded-full" style="width: {{ data.confidence_level|floatformat:0|add:"0" }}0%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ data.total_trades }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ data.winning_trades }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="text-sm text-gray-900">{{ data.win_rate }}%</div>
+                                        <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-green-500 h-2 rounded-full" style="width: {{ data.win_rate }}%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium {% if data.total_pnl > 0 %}text-green-600{% elif data.total_pnl < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                                        ₹{{ data.total_pnl }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm {% if data.avg_pnl > 0 %}text-green-600{% elif data.avg_pnl < 0 %}text-red-600{% else %}text-gray-600{% endif %}">
+                                        ₹{{ data.avg_pnl }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-green-600">₹{{ data.avg_win }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-red-600">₹{{ data.avg_loss }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if data.total_trades > 0 %}
+                                        {% if data.win_rate >= 70 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-star mr-1"></i>Excellent
+                                            </span>
+                                        {% elif data.win_rate >= 60 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <i class="fas fa-thumbs-up mr-1"></i>Good
+                                            </span>
+                                        {% elif data.win_rate >= 50 %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-balance-scale mr-1"></i>Average
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i>Needs Improvement
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-minus mr-1"></i>No Data
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Insights Section -->
+                <div class="mt-8 bg-blue-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-medium text-blue-900 mb-4">
+                        <i class="fas fa-lightbulb mr-2"></i>Key Insights
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium text-blue-800 mb-2">Best Performing Confidence Level:</h4>
+                            <p class="text-blue-700">
+                                {% for data in performance_data %}
+                                    {% if data.total_trades > 0 and data.win_rate == performance_data|length|add:"-1"|add:"1" %}
+                                        Confidence level {{ data.confidence_level }} with {{ data.win_rate }}% win rate
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-blue-800 mb-2">Recommendation:</h4>
+                            <p class="text-blue-700">
+                                Focus on trades where your confidence level is high but also validate your confidence with actual market analysis.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-chart-line text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Trading Data Available</h3>
+                    <p class="text-gray-600 mb-6">Start trading with confidence levels to see your performance analysis.</p>
+                    <a href="{% url 'trade_create' %}" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                        Add Your First Trade
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create confidence vs performance chart
+        const ctx = document.getElementById('confidenceChart');
+        if (ctx) {
+            const confidenceData = {{ confidence_levels|safe }};
+            const winRateData = {{ win_rates|safe }};
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: confidenceData.map(level => level + '/10'),
+                    datasets: [{
+                        label: 'Win Rate (%)',
+                        data: winRateData,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Win Rate (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Confidence Level'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Confidence Level vs Win Rate Analysis'
+                        },
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Trade, WeeklyReview, MonthlyReview, TradingPsychology, TradingGoal, MarketCondition, TradingHabit
+from .models import Trade, WeeklyReview, MonthlyReview, TradingPsychology, TradingGoal, MarketCondition, TradingHabit, RiskManagement
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -43,20 +43,24 @@ class TradeForm(forms.ModelForm):
     class Meta:
         model = Trade
         fields = [
-            'date', 'symbol', 'trade_type', 'entry_price', 'exit_price', 'quantity',
-            'stop_loss', 'target_price', 'exit_reason', 'profit_loss', 'percentage_gain_loss',
-            'setup_type', 'confidence_level', 'screenshot_before', 'screenshot_after',
-            'emotion_notes', 'learning_notes'
+            'date', 'symbol', 'trade_type', 'trade_status', 'entry_time', 'exit_time',
+            'entry_price', 'exit_price', 'quantity', 'stop_loss', 'target_price', 'risk_per_trade',
+            'exit_reason', 'profit_loss', 'percentage_gain_loss', 'setup_type', 'confidence_level', 
+            'screenshot_before', 'screenshot_after', 'emotion_notes', 'learning_notes'
         ]
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
             'symbol': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'placeholder': 'e.g., RELIANCE, TCS, INFY, HDFCBANK'}),
             'trade_type': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
+            'trade_status': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
+            'entry_time': forms.TimeInput(attrs={'type': 'time', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
+            'exit_time': forms.TimeInput(attrs={'type': 'time', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'}),
             'entry_price': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01'}),
             'exit_price': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01'}),
             'quantity': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'min': '1'}),
             'stop_loss': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01'}),
             'target_price': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01'}),
+            'risk_per_trade': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.1', 'min': '0', 'max': '100', 'placeholder': 'Risk % per trade'}),
             'exit_reason': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'rows': 3, 'placeholder': 'Why did you exit this trade?'}),
             'profit_loss': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01', 'readonly': 'readonly', 'style': 'background-color: #f9fafb;'}),
             'percentage_gain_loss': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01', 'readonly': 'readonly', 'style': 'background-color: #f9fafb;'}),
@@ -71,6 +75,7 @@ class TradeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Make some fields optional
+        self.fields['exit_time'].required = False
         self.fields['screenshot_before'].required = False
         self.fields['screenshot_after'].required = False
         self.fields['emotion_notes'].required = False
@@ -246,3 +251,27 @@ class TradingHabitForm(forms.ModelForm):
         }
 
 
+class RiskManagementForm(forms.ModelForm):
+    class Meta:
+        model = RiskManagement
+        fields = [
+            'max_daily_loss', 'max_daily_trades', 'max_position_size', 'max_risk_per_trade',
+            'max_portfolio_risk', 'max_correlation_exposure', 'max_drawdown_limit', 
+            'stop_trading_drawdown', 'max_trading_hours_per_day', 'mandatory_break_duration',
+            'enable_loss_alerts', 'enable_drawdown_alerts', 'enable_position_size_alerts'
+        ]
+        widgets = {
+            'max_daily_loss': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01', 'placeholder': 'Maximum daily loss limit'}),
+            'max_daily_trades': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'min': '1', 'placeholder': 'Maximum trades per day'}),
+            'max_position_size': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.01', 'placeholder': 'Maximum position size'}),
+            'max_risk_per_trade': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.1', 'min': '0', 'max': '100', 'placeholder': 'Max risk % per trade'}),
+            'max_portfolio_risk': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.1', 'min': '0', 'max': '100', 'placeholder': 'Max portfolio risk %'}),
+            'max_correlation_exposure': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.1', 'min': '0', 'max': '100', 'placeholder': 'Max correlation exposure %'}),
+            'max_drawdown_limit': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.1', 'min': '0', 'max': '100', 'placeholder': 'Max drawdown limit %'}),
+            'stop_trading_drawdown': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'step': '0.1', 'min': '0', 'max': '100', 'placeholder': 'Stop trading at drawdown %'}),
+            'max_trading_hours_per_day': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'min': '1', 'max': '24', 'placeholder': 'Max trading hours per day'}),
+            'mandatory_break_duration': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500', 'min': '0', 'placeholder': 'Mandatory break duration (minutes)'}),
+            'enable_loss_alerts': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'}),
+            'enable_drawdown_alerts': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'}),
+            'enable_position_size_alerts': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'}),
+        }
