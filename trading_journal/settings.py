@@ -75,22 +75,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'trading_journal.wsgi.application'
 
-# Database configuration - Supabase PostgreSQL
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='postgres'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-            'connect_timeout': 10,
-        },
-        'CONN_MAX_AGE': 600,
+# Database configuration - Supabase PostgreSQL with fallback
+try:
+    # Try Supabase PostgreSQL first
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME', default='postgres'),
+            'USER': config('DB_USER', default='postgres'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+                'connect_timeout': 30,
+                'application_name': 'trading_journal',
+            },
+            'CONN_MAX_AGE': 0,  # Disable connection pooling for debugging
+            'CONN_HEALTH_CHECKS': True,
+        }
     }
-}
+except Exception as e:
+    # Fallback to SQLite if Supabase fails
+    print(f"Supabase connection failed: {e}")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
