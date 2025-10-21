@@ -31,7 +31,7 @@ def login_view(request):
             return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
-    return render(request, 'registration/login.html', {'form': None})
+    return render(request, 'registration/login.html')
 
 def register_view(request):
     """User registration view"""
